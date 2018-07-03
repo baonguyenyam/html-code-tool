@@ -22,14 +22,22 @@ gulp.task('scripts', function() {
   .pipe(gulp.dest('app/dist'));
 });
 
-gulp.task('scriptsVendor', function() {
+gulp.task('scriptsCore', function() {
   return streamqueue({ objectMode: true },
     gulp.src('lib/angular.min.js'),
     gulp.src('lib/angular-animate.min.js'),
     gulp.src('lib/angular-messages.min.js'),
     gulp.src('lib/jquery.min.js'),
-    gulp.src('app/vendor/**/*.min.js'),
     gulp.src('lib/modernizr.min.js'),
+    gulp.src('app/vendor/**/*.min.js')
+  )
+  .pipe(concat('scripts-core.min.js'))
+  .pipe(removeUseStrict())
+  .pipe(uglify())
+  .pipe(gulp.dest('app/dist'));
+})
+gulp.task('scriptsVendor', function() {
+  return streamqueue({ objectMode: true },
     gulp.src('lib/re-tree.min.js'),
     gulp.src('lib/ui-bootstrap.min.js'),
     gulp.src('lib/ui-bootstrap-tpls.min.js'),
@@ -80,6 +88,7 @@ gulp.task('watch', function () {
 gulp.task('default', function(callback) {
   runSequence(
     'scripts', 
+    'scriptsCore', 
     'scriptsVendor', 
     'styles' , 
     'stylesVendor', 

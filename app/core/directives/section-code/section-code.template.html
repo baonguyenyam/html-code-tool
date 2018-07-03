@@ -1,0 +1,9 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    {{title}}
+    <button class="btn btn-raised btn-xs code-copy-btn" data-abm-component data-ngclipboard data-clipboard-target="#{{codeId}}">Copy</button>
+  </div>
+  <div class="panel-body">
+    <pre id="{{codeId}}"><code data-ng-bind="code"></code></pre>
+  </div>
+</div>

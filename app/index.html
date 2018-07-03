@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html data-ng-app="app">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" href="./img/favicon.png">
+
+  <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+  <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
+  <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-messages.min.js"></script>
+
+  <!-- jQuery required for some vendor scripts. -->
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script defer src="./dist/scripts-vendor.min.js"></script>
+
+  <script defer src="./dist/scripts.min.js"></script>
+
+  <!-- Material Design fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <!-- Vendor CSS -->
+  <link rel="stylesheet" href="./dist/styles-vendor.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./dist/styles.min.css">
+
+  <style data-ng-bind="pageStyle" data-ng-if="pageStyle"></style>
+
+</head>
+
+<body data-ng-controller="AppController as mainCtrl" class="{{mainCtrl.bodyColor}}">
+  <jsonld data-json="mainCtrl.jsonLd"></jsonld>
+
+  <top-menu></top-menu>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 col-lg-10 col-lg-offset-2 main">
+        <div data-ui-view class="view-animate"></div>
+      </div>
+
+      <div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 col-lg-10 col-lg-offset-2 main">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12">
+            <main-footer></main-footer>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

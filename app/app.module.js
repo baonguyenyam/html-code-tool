@@ -25,7 +25,7 @@
       $urlMatcherFactoryProvider,
       $animateProvider,
       $analyticsProvider) {
-        $locationProvider.html5Mode(true);
+        $locationProvider.html5Mode(false);
 
         $analyticsProvider.firstPageview(true); // Records pages that don't use $state or $route
         $analyticsProvider.withBase(true);  // Records full path

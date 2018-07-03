@@ -18,29 +18,30 @@
   },
   "homepage": "https://github.com/baonguyenyam/html-code-tool#readme",
   "scripts": {
+    "dev": "gulp && http-server -a localhost -p 8000 -c-1 ./app",
     "start": "http-server -a localhost -p 8000 -c-1 ./app",
     "test": "karma start karma.conf.js",
     "test-single-run": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
     "preprotractor": "npm run update-webdriver",
     "protractor": "protractor e2e-tests/protractor.conf.js",
-    "update-index-async": "node -e \"var fs=require('fs'),indexFile='app/index-async.html',loaderFile='app/bower_components/angular-loader/angular-loader.min.js',loaderText=fs.readFileSync(loaderFile,'utf-8').split(/sourceMappingURL=angular-loader.min.js.map/).join('sourceMappingURL=bower_components/angular-loader/angular-loader.min.js.map'),indexText=fs.readFileSync(indexFile,'utf-8').split(/\\/\\/@@NG_LOADER_START@@[\\s\\S]*\\/\\/@@NG_LOADER_END@@/).join('//@@NG_LOADER_START@@\\n'+loaderText+'    //@@NG_LOADER_END@@');fs.writeFileSync(indexFile,indexText);\""
+    "update-index-async": "node -e \"var fs=require('fs'),indexFile='app/index-async.html',loaderFile='bower_components/angular-loader/angular-loader.min.js',loaderText=fs.readFileSync(loaderFile,'utf-8').split(/sourceMappingURL=angular-loader.min.js.map/).join('sourceMappingURL=bower_components/angular-loader/angular-loader.min.js.map'),indexText=fs.readFileSync(indexFile,'utf-8').split(/\\/\\/@@NG_LOADER_START@@[\\s\\S]*\\/\\/@@NG_LOADER_END@@/).join('//@@NG_LOADER_START@@\\n'+loaderText+'    //@@NG_LOADER_END@@');fs.writeFileSync(indexFile,indexText);\""
   },
   "dependencies": {
     "gulp": "3.9.1",
-    "gulp-clean-css": "3.9.2",
+    "gulp-clean-css": "3.9.4",
     "gulp-concat": "2.6.1",
     "gulp-environments": "0.1.2",
     "gulp-remove-use-strict": "0.0.2",
     "gulp-uglify": "3.0.0",
     "http-server": "0.11.1",
-    "jasmine-core": "2.8.0",
-    "karma": "2.0.0",
+    "jasmine-core": "3.1.0",
+    "karma": "2.0.4",
     "karma-chrome-launcher": "2.2.0",
     "karma-firefox-launcher": "1.1.0",
-    "karma-jasmine": "1.1.1",
+    "karma-jasmine": "1.1.2",
     "karma-junit-reporter": "1.2.0",
-    "protractor": "5.2.2",
+    "protractor": "5.3.2",
     "streamqueue": "1.1.2"
   }
 }

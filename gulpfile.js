@@ -22,24 +22,24 @@ gulp.task('scripts', function() {
 });
 
 gulp.task('scriptsVendor', function() {
-  return streamqueue({ objectMode: true },
-    gulp.src('app/vendor/**/*.min.js'),
-    gulp.src('bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js'),
-    gulp.src('bower_components/re-tree/re-tree.min.js'),
-    gulp.src('bower_components/angular-bootstrap/ui-bootstrap.min.js'),
-    gulp.src('bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js'),
-    gulp.src('bower_components/angular-bootstrap-material/dist/angular-bootstrap-material.min.js'),
-    gulp.src('bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.min.js'),
-    gulp.src('bower_components/angular-breadcrumb/dist/angular-breadcrumb.min.js'),
-    gulp.src('bower_components/angular-google-adsense/dist/angular-google-adsense.min.js'),
-    gulp.src('bower_components/angulartics/dist/angulartics.min.js'),
-    gulp.src('bower_components/angulartics-google-analytics/dist/angulartics-ga.min.js'),
-    gulp.src('bower_components/angular-ui-router/release/angular-ui-router.min.js'),
-    gulp.src('bower_components/clipboard/dist/clipboard.min.js'),
-    gulp.src('bower_components/ngclipboard/dist/ngclipboard.min.js'),
-    gulp.src('bower_components/ng-device-detector/ng-device-detector.min.js'),
-    gulp.src('bower_components/ui-router-metatags/dist/ui-router-metatags.min.js')
-  )
+  return gulp.src([
+    'app/vendor/**/*.min.js',
+    'bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js',
+    'bower_components/re-tree/re-tree.min.js',
+    'bower_components/angular-bootstrap/ui-bootstrap.min.js',
+    'bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
+    'bower_components/angular-bootstrap-material/dist/angular-bootstrap-material.min.js',
+    'bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.min.js',
+    'bower_components/angular-breadcrumb/dist/angular-breadcrumb.min.js',
+    'bower_components/angular-google-adsense/dist/angular-google-adsense.min.js',
+    'bower_components/angulartics/dist/angulartics.min.js',
+    'bower_components/angulartics-google-analytics/dist/angulartics-ga.min.js',
+    'bower_components/angular-ui-router/release/angular-ui-router.min.js',
+    'bower_components/clipboard/dist/clipboard.min.js',
+    'bower_components/ngclipboard/dist/ngclipboard.min.js',
+    'bower_components/ng-device-detector/ng-device-detector.min.js',
+    'bower_components/ui-router-metatags/dist/ui-router-metatags.min.js'
+  ])
   .pipe(concat('scripts-vendor.min.js'))
   .pipe(removeUseStrict())
   .pipe(uglify())

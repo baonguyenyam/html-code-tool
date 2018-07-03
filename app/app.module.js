@@ -33,7 +33,7 @@
         // If no state is found, go to 404 error page.
         $urlRouterProvider.otherwise(function($injector, $location){
           var state = $injector.get('$state');
-          state.go('error-404');
+          state.go('dashboard');
           return $location.path();
         });
 

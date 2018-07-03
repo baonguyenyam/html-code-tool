@@ -4,6 +4,7 @@ var concat = require('gulp-concat');
 var streamqueue  = require('streamqueue');
 var removeUseStrict = require("gulp-remove-use-strict");
 var cleanCSS = require('gulp-clean-css');
+var runSequence = require('run-sequence');
 
 gulp.task('scripts', function() {
   return streamqueue({ objectMode: true },
@@ -23,22 +24,26 @@ gulp.task('scripts', function() {
 
 gulp.task('scriptsVendor', function() {
   return streamqueue({ objectMode: true },
+    gulp.src('lib/angular.min.js'),
+    gulp.src('lib/angular-animate.min.js'),
+    gulp.src('lib/angular-messages.min.js'),
+    gulp.src('lib/jquery.min.js'),
     gulp.src('app/vendor/**/*.min.js'),
-    gulp.src('bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js'),
-    gulp.src('bower_components/re-tree/re-tree.min.js'),
-    gulp.src('bower_components/angular-bootstrap/ui-bootstrap.min.js'),
-    gulp.src('bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js'),
-    gulp.src('bower_components/angular-bootstrap-material/dist/angular-bootstrap-material.min.js'),
-    gulp.src('bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.min.js'),
-    gulp.src('bower_components/angular-breadcrumb/dist/angular-breadcrumb.min.js'),
-    gulp.src('bower_components/angular-google-adsense/dist/angular-google-adsense.min.js'),
-    gulp.src('bower_components/angulartics/dist/angulartics.min.js'),
-    gulp.src('bower_components/angulartics-google-analytics/dist/angulartics-ga.min.js'),
-    gulp.src('bower_components/angular-ui-router/release/angular-ui-router.min.js'),
-    gulp.src('bower_components/clipboard/dist/clipboard.min.js'),
-    gulp.src('bower_components/ngclipboard/dist/ngclipboard.min.js'),
-    gulp.src('bower_components/ng-device-detector/ng-device-detector.min.js'),
-    gulp.src('bower_components/ui-router-metatags/dist/ui-router-metatags.min.js')
+    gulp.src('lib/modernizr.min.js'),
+    gulp.src('lib/re-tree.min.js'),
+    gulp.src('lib/ui-bootstrap.min.js'),
+    gulp.src('lib/ui-bootstrap-tpls.min.js'),
+    gulp.src('lib/angular-bootstrap-material.min.js'),
+    gulp.src('lib/bootstrap-colorpicker-module.min.js'),
+    gulp.src('lib/angular-breadcrumb.min.js'),
+    gulp.src('lib/angular-google-adsense.min.js'),
+    gulp.src('lib/angulartics.min.js'),
+    gulp.src('lib/angulartics-ga.min.js'),
+    gulp.src('lib/angular-ui-router.min.js'),
+    gulp.src('lib/clipboard.min.js'),
+    gulp.src('lib/ngclipboard.min.js'),
+    gulp.src('lib/ng-device-detector.min.js'),
+    gulp.src('lib/ui-router-metatags.min.js')
   )
   .pipe(concat('scripts-vendor.min.js'))
   .pipe(removeUseStrict())
@@ -58,12 +63,26 @@ gulp.task('styles', function() {
 
 gulp.task('stylesVendor', function() {
   return streamqueue({ objectMode: true },
-    gulp.src('app/vendor/**/*.min.css'),
-    gulp.src('bower_components/angular-bootstrap-colorpicker/css/colorpicker.min.css')
+    gulp.src('app/styles/colorpicker.min.css'),
+    gulp.src('app/styles/bootstrap.min.css'),
+    gulp.src('app/vendor/**/*.min.css')
   )
   .pipe(concat('styles-vendor.min.css'))
   .pipe(cleanCSS())
   .pipe(gulp.dest('app/dist'));
 });
 
-gulp.task('default', [ 'scripts', 'scriptsVendor', 'styles' , 'stylesVendor']);
+gulp.task('watch', function () {
+  gulp.watch('app/styles/*.css', ['styles']);
+  gulp.watch('app/**/*.js', ['scripts']);
+});
+
+gulp.task('default', function(callback) {
+  runSequence(
+    'scripts', 
+    'scriptsVendor', 
+    'styles' , 
+    'stylesVendor', 
+    'watch',
+     callback);
+});

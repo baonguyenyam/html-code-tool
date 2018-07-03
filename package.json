@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/baonguyenyam/html-code-tool#readme",
   "scripts": {
-    "dev": "gulp && http-server -a localhost -p 8000 -c-1 ./app",
+    "dev": "gulp & http-server -a localhost -p 8000 -c-1 ./app",
     "start": "http-server -c-1 ./app",
     "test": "karma start karma.conf.js",
     "test-single-run": "karma start karma.conf.js --single-run",
@@ -42,6 +42,7 @@
     "karma-jasmine": "1.1.2",
     "karma-junit-reporter": "1.2.0",
     "protractor": "5.3.2",
+    "run-sequence": "^2.2.1",
     "streamqueue": "1.1.2"
   }
 }

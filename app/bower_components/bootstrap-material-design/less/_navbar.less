@@ -1,5 +1,5 @@
 .navbar {
-  background-color: @brand-primary;
+  background-color: @primary;
   border: 0;
   border-radius: 0;
 
@@ -86,7 +86,7 @@
       }
     }
 
-    @media (max-width: @grid-float-breakpoint-max) {
+    @media (max-width: 767px) {
       .navbar-text {
         color: inherit;
         margin-top: 15px;
@@ -155,64 +155,38 @@
 
   .navbar-form {
     margin-top: 16px;
-    .form-group {
-      margin: 0;
-      padding: 0;
-
-      .material-input:before,
-      &.is-focused .material-input:after {
+    .form-control-wrapper .form-control, .form-control {
+      border-color: inherit;
+      color: inherit;
+    }
+    .form-control-wrapper {
+      .material-input:before, input:focus ~ .material-input:after {
         background-color: inherit;
       }
     }
-
-    .form-group .form-control,
-    .form-control {
-      border-color: inherit;
-      color: inherit;
-      padding: 0;
-      margin: 0;
-
-      // re-normalize inputs in a navbar the size of standard bootstrap since our normal inputs are larger by spec than bootstrap
-      //---
-      //height: @mdb-input-height-base;
-      @bs-line-height-base: 1.428571429;
-      @bs-line-height-computed:    floor((@font-size-base * @bs-line-height-base)); // ~20px
-      height: (@bs-line-height-computed + 8px);
-      font-size: @font-size-base;
-      line-height: @bs-line-height-base;
-      //---
-    }
   }
 
-  // SASS conversion note: please mirror any content change in _mixins-shared.scss navbar-variations-content
-  .generic-variations(~".navbar", ~"", @brand-primary, {
-    background-color: @variation-color;
-    color: @variation-color-text;
+  .generic-variations(~".navbar", @primary, {
+    background-color: @material-color;
+    color: @text-color;
     // deeply defined to override welljumbo class without !impotant need
-    .navbar-form .form-group input.form-control,
-    .navbar-form input.form-control {
-      .material-placeholder({
-        color: @variation-color-text;
-      });
+    .navbar-form .form-control-wrapper input.form-control::placeholder, .navbar-form input.form-control::placeholder {
+      color: @text-color;
     }
     .dropdown-menu {
-      border-radius: @border-radius-base;
       li > a {
-        font-size: @mdb-dropdown-font-size;
-        padding: 13px 16px;
         &:hover,
         &:focus {
-          color: @variation-color;
-          background-color: @grey-200;
+          color: @material-color;
         }
       }
       .active > a {
         &:hover,
         &:focus {
-          color: @variation-color-text;
+          color: @text-color;
         }
-        background-color: @variation-color;
-        color: @variation-color-text;
+        background-color: @material-color;
+        color: @text-color;
       }
     }
   });
@@ -221,7 +195,7 @@
     background-color: @indigo;
   }
 
-  @media (max-width: @screen-md-max) {
+  @media (max-width: 1199px) {
 
     .navbar-brand {
       height: 50px;

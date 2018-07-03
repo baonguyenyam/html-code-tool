@@ -1,6 +1,6 @@
 {
   "name": "re-tree",
-  "version": "0.1.7",
+  "version": "0.0.2",
   "homepage": "https://github.com/srfrnk/re-tree",
   "authors": [
     "srfrnk <srfrnk@gmail.com>"
@@ -25,13 +25,13 @@
     "test",
     "tests"
   ],
-  "_release": "0.1.7",
+  "_release": "0.0.2",
   "_resolution": {
     "type": "version",
-    "tag": "v0.1.7",
-    "commit": "ce32aaef950038867d4b6844a887c14e6b2d7a73"
+    "tag": "v0.0.2",
+    "commit": "2b89f000d48cc72de56e008dd07bc743e9434059"
   },
   "_source": "https://github.com/srfrnk/re-tree.git",
-  "_target": "0.1.7",
+  "_target": "0.0.2",
   "_originalSource": "re-tree"
 }

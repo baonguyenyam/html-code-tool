@@ -6,17 +6,11 @@
  * Enables analytics support for Google Analytics (http://google.com/analytics)
  */
 angular.module('angulartics.google.analytics', ['angulartics'])
-.config(['$analyticsProvider', '$windowProvider', function ($analyticsProvider, $windowProvider) {
-
-  var $window = $windowProvider.$get();
+.config(['$analyticsProvider', function ($analyticsProvider) {
 
   // GA already supports buffered invocations so we don't need
   // to wrap these inside angulartics.waitForVendorApi
   $analyticsProvider.settings.pageTracking.trackRelativePath = true;
-
-  // We cache the latest pageTrack path value here to ensure consistent
-  // tracking of the page dimension with other hits
-  var pagePathCache;
   
   // Set the default settings for this module
   $analyticsProvider.settings.ga = {
@@ -52,14 +46,12 @@ angular.module('angulartics.google.analytics', ['angulartics'])
    */
   $analyticsProvider.registerPageTrack(function (path, properties) {
     
-    pagePathCache = path;
-
     properties = properties || {};
 
     // Do nothing if page tracking is disabled
     if ($analyticsProvider.settings.ga.disablePageTracking) return;
 
-    dispatchToGa('pageview', 'send', angular.extend(angular.copy(properties), {
+    dispatchToGa('pageview', 'send', angular.extend({}, properties, {
       hitType: 'pageview',
       page: path
     }));
@@ -108,14 +100,14 @@ angular.module('angulartics.google.analytics', ['angulartics'])
     // https://github.com/angulartics/angulartics-google-analytics/issues/49
     properties.nonInteraction = properties.nonInteraction || properties.noninteraction;
 
-    dispatchToGa('event', 'send', angular.extend(angular.copy(properties), {
+    dispatchToGa('event', 'send', angular.extend({}, properties, {
       hitType: 'event',
       eventCategory: properties.category,
       eventAction: action,
       eventLabel: properties.label,
       eventValue: properties.value,
       nonInteraction: properties.nonInteraction,
-      page: getPage_(properties),
+      page: properties.page || window.location.hash.substring(1) || window.location.pathname,
       hitCallback: properties.hitCallback,
     }));
 
@@ -138,7 +130,7 @@ angular.module('angulartics.google.analytics', ['angulartics'])
       eventAction: error.toString(),
       eventLabel: error.stack,
       nonInteraction: true,
-      page: getPage_({}),
+      page: window.location.hash.substring(1) || window.location.pathname,
       isException: true
     });
   });
@@ -205,7 +197,7 @@ angular.module('angulartics.google.analytics', ['angulartics'])
       timingValue: properties.timingValue,
       timingLabel: properties.timingLabel,
       optSampleRate: properties.optSampleRate,  // Classic Analytics only
-      page: getPage_(properties)
+      page: properties.page || window.location.hash.substring(1) || window.location.pathname,
     });
 
   });
@@ -300,8 +292,8 @@ angular.module('angulartics.google.analytics', ['angulartics'])
 
     // Use the GoogleAnalyticsObject property set by the default GA snippet
     // to correctly determine the namespace of the GA global
-    var gaNamespace = $window.GoogleAnalyticsObject;
-    return gaNamespace && $window[gaNamespace];
+    var gaNamespace = window.GoogleAnalyticsObject;
+    return gaNamespace && window[gaNamespace];
 
   }
 
@@ -313,7 +305,7 @@ angular.module('angulartics.google.analytics', ['angulartics'])
   function detectClassicAnalytics() {
 
     // If _gaq is undefined, we're trusting Classic Analytics to be there
-    return !angular.isUndefined($window._gaq);
+    return !angular.isUndefined(window._gaq);
 
   }
 
@@ -350,9 +342,9 @@ angular.module('angulartics.google.analytics', ['angulartics'])
    * @param {string} method Name of angulartics method for checking if hits should be duplicated
    * @param {string} command Standard Universal Analytics command (create, send, set)
    * @param {object} fieldsObj object with hit-specific fields. Fields are whitelisted in handler - non-supported fields are ignored.
-   *
+   * 
    */
-  var dispatchToGa = function(method, command, fieldsObj) {
+  var dispatchToGa = (function() {
 
     var handler;
 
@@ -366,266 +358,255 @@ angular.module('angulartics.google.analytics', ['angulartics'])
 
     // If neither has been detected, GA is not above the angular code
     if (!handler) {
-      return;
+      return angular.noop;
     }
 
-    var shouldCopyHit = $analyticsProvider.settings.ga.additionalAccountHitTypes[method];
-    handler(command, fieldsObj, shouldCopyHit);
-  };
+    return function(method, command, fieldsObj) {
 
-  /**
-   * Dispatches a hit using Universal syntax
-   *
-   * @name dispatchToUniversal_
-   * @private
-   *
-   * @param {string} command Standard Universal Analytics command (create, send, set)
-   * @param {object} fieldsObj object with hit-specific fields. Fields are whitelisted in handler - non-supported fields are ignored.
-   * @param {boolean} shouldCopyHit should hit be propogated to all trackers
-   */
-  function dispatchToUniversal_(command, fieldsObj, shouldCopyHit) {
+      var shouldCopyHit = $analyticsProvider.settings.ga.additionalAccountHitTypes[method];
+      handler(command, fieldsObj, shouldCopyHit);
 
-    var userId = $analyticsProvider.settings.ga.userId;
-    var uaCommand,
-        pluginName;
+    }
 
-    if (command === 'require' && fieldsObj === 'ecommerce') {
+    /**
+     * Dispatches a hit using Universal syntax
+     *
+     * @name dispatchToUniversal_
+     * @private
+     *  
+     * @param {string} command Standard Universal Analytics command (create, send, set)
+     * @param {object} fieldsObj object with hit-specific fields. Fields are whitelisted in handler - non-supported fields are ignored.
+     * @param {boolean} shouldCopyHit should hit be propogated to all trackers
+     */
+    function dispatchToUniversal_(command, fieldsObj, shouldCopyHit) {
 
-      pluginName = fieldsObj;
+      var userId = $analyticsProvider.settings.ga.userId;
+      var uaCommand,
+          pluginName;
 
-      if ($analyticsProvider.settings.ga.enhancedEcommerce) {
+      if (command === 'require' && fieldsObj === 'ecommerce') {
 
-        pluginName = 'ec';
+        pluginName = fieldsObj;
+  
+        if ($analyticsProvider.settings.ga.enhancedEcommerce) {
+  
+          pluginName = 'ec';
+
+        }
+      
+        // Exit here - require calls don't have fieldsObjs
+        return applyUniversalCall_([command, pluginName], shouldCopyHit);
 
       }
 
-      // Exit here - require calls don't have fieldsObjs
-      return applyUniversalCall_([command, pluginName], shouldCopyHit);
+      // If our User ID is set, set it on the hit
+      if (userId && angular.isObject(fieldsObj)) fieldsObj.userId = userId;
+      // If a transport preference is specified, set it on the hit
+      if ($analyticsProvider.settings.ga.transport) {
 
-    }
+        fieldsObj.transport = $analyticsProvider.settings.ga.transport;
 
-    // If our User ID is set, set it on the hit
-    if (userId && angular.isObject(fieldsObj)) fieldsObj.userId = userId;
-    // If a transport preference is specified, set it on the hit
-    if ($analyticsProvider.settings.ga.transport) {
-
-      fieldsObj.transport = $analyticsProvider.settings.ga.transport;
-
-    }
-
-    if (command.indexOf('ecommerce:') > -1 && $analyticsProvider.settings.ga.enhancedEcommerce) {
-
-      switch (command) {
-        case 'ecommerce:addTransaction':
-          command = ['ec:setAction', 'purchase'];
-          break;
-        case 'ecommerce:addItem':
-          command = 'ec:addProduct';
-          // Enhanced Ecommerce reverts to using the ID property for the SKU,
-          // so we swap them back here
-          fieldsObj.id = fieldsObj.sku;
-          break;
-        case 'ecommerce:send':
-          command = 'send';
-          fieldsObj.hitType = 'event';
-          fieldsObj.eventCategory = 'Angulartics Enhanced Ecommerce';
-          fieldsObj.eventAction = 'Purchase';
-          fieldsObj.nonInteraction = true;
-          break;
       }
 
-    }
+      if (command.indexOf('ecommerce:') > -1 && $analyticsProvider.settings.ga.enhancedEcommerce) {
 
-
-    uaCommand = command instanceof Array ? command.concat(fieldsObj) : [command, fieldsObj];
-
-    applyUniversalCall_(uaCommand, shouldCopyHit);
-
-  }
-
-  /**
-   * Handles applying a constructed call to the global Universal GA object
-   * This exists primarily so calls within dispatchToUa_ can short circuit
-   * out of the function to handle specific edge cases, e.g. require commands
-   * @name applyUniversalCall_
-   * @private
-   *
-   * @param commandArray {array} command to be .apply()'d
-   * @param shouldCopyHit {boolean} should the command be applied to all accts
-   */
-  function applyUniversalCall_(commandArray, shouldCopyHit) {
-
-    var userId = $analyticsProvider.settings.ga.userId;
-    var gaNamespace = $window.GoogleAnalyticsObject;
-    var commandClone;
-
-    // Perform our initial call
-    $window[gaNamespace].apply(this, commandArray);
-
-    if (shouldCopyHit) {
-
-      commandClone = angular.copy(commandArray);
-
-      // If the userId shouldn't be duplicated, remove from the fieldsObj
-      if (userId && !$analyticsProvider.settings.ga.additionalAccountHitTypes.userId) {
-
-        if (commandClone[2] && typeof commandClone[2] === 'object') {
-
-          delete commandClone[2].userId;
-
+        switch (command) {
+          case 'ecommerce:addTransaction':
+            command = ['ec:setAction', 'purchase'];
+            break;
+          case 'ecommerce:addItem':
+            command = 'ec:addProduct';
+            // Enhanced Ecommerce reverts to using the ID property for the SKU,
+            // so we swap them back here
+            fieldsObj.id = fieldsObj.sku;
+            break;
+          case 'ecommerce:send':
+            command = 'send';
+            fieldsObj.hitType = 'event';
+            fieldsObj.eventCategory = 'Angulartics Enhanced Ecommerce';
+            fieldsObj.eventAction = 'Purchase';
+            fieldsObj.nonInteraction = true;
+            break;
         }
 
       }
 
-      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
 
-        commandClone[0] = accountName + '.' + commandArray[0];
+      uaCommand = command instanceof Array ? command.concat(fieldsObj) : [command, fieldsObj];
 
-        $window[gaNamespace].apply(this, commandClone);
-
-      });
+      applyUniversalCall_(uaCommand, shouldCopyHit);
 
     }
 
-  }
+    /**
+     * Handles applying a constructed call to the global Universal GA object
+     * This exists primarily so calls within dispatchToUa_ can short circuit
+     * out of the function to handle specific edge cases, e.g. require commands
+     * @name applyUniversalCall_
+     * @private
+     *
+     * @param commandArray {array} command to be .apply()'d
+     * @param shouldCopyHit {boolean} should the command be applied to all accts
+     */
+    function applyUniversalCall_(commandArray, shouldCopyHit) {
 
-  /**
-   * Dispatches a hit using Classic syntax
-   * Translates Universal Syntax to Classic syntax
-   *
-   * @name dispatchToClassic_
-   * @private
-   *
-   * @param {string} command Standard Universal Analytics command (create, send, set)
-   * @param {object} fieldsObj object with hit-specific fields. Fields are whitelisted in handler - non-supported fields are ignored.
-   * @param {boolean} shouldCopyHit should hit be propogated to all trackers
-   */
-  function dispatchToClassic_(command, fieldsObj, shouldCopyHit) {
+      var userId = $analyticsProvider.settings.ga.userId;
+      var gaNamespace = window.GoogleAnalyticsObject;
+      var commandClone;
 
-    if (command === 'set') {
-      return console.log('Classic Analytics does not support the "set" command or Custom Dimensions. Command ignored.');
-    }
+      // Perform our initial call
+      window[gaNamespace].apply(this, commandArray);
 
-    var classicCommand;
+      if (shouldCopyHit) {
 
-    // Transpose our syntax from Universal Analytics to Classic Analytics
-    // Currently we only support 'send' style commands
-    if (command === 'send') {
+        commandClone = angular.copy(commandArray);
 
-      switch(fieldsObj.hitType) {
-        case 'pageview':
-          classicCommand = ['_trackPageview', fieldsObj.page];
-          break;
-        case 'event':
-          classicCommand = [
-            '_trackEvent',
-            fieldsObj.eventCategory,
-            fieldsObj.eventAction,
-            fieldsObj.eventLabel,
-            fieldsObj.eventValue,
-            fieldsObj.nonInteraction
-          ];
-          break;
-        case 'timing':
-          classicCommand = [
-            '_trackTiming',
-            fieldsObj.timingCategory,
-            fieldsObj.timingVar,
-            fieldsObj.timingValue,
-            fieldsObj.timingLabel,
-            fieldsObj.optSampleRate
-          ];
-          break;
+        // If the userId shouldn't be duplicated, remove from the fieldsObj
+        if (userId && !$analyticsProvider.settings.ga.additionalAccountHitTypes.userId) {
+          
+          if (commandClone[2] && typeof commandClone[2] === 'object') {
+
+            delete commandClone[2].userId;
+
+          }
+  
+        }
+
+        angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
+       
+          commandClone[0] = accountName + '.' + commandClone[0];
+
+          window[gaNamespace].apply(this, commandClone);
+
+        }); 
+
       }
 
     }
 
-    if (command === 'ecommerce:addTransaction') {
+    /**
+     * Dispatches a hit using Classic syntax
+     * Translates Universal Syntax to Classic syntax
+     *
+     * @name dispatchToClassic_
+     * @private
+     *  
+     * @param {string} command Standard Universal Analytics command (create, send, set)
+     * @param {object} fieldsObj object with hit-specific fields. Fields are whitelisted in handler - non-supported fields are ignored.
+     * @param {boolean} shouldCopyHit should hit be propogated to all trackers
+     */
+    function dispatchToClassic_(command, fieldsObj, shouldCopyHit) {
 
-      classicCommand = [
-        '_addTrans',
-        fieldsObj.id,
-        fieldsObj.affiliation,
-        fieldsObj.revenue,
-        fieldsObj.tax,
-        fieldsObj.shipping,
-        fieldsObj.billingCity,
-        fieldsObj.billingRegion,
-        fieldsObj.billingCountry
-      ];
+      if (command === 'set') {
+        return console.log('Classic Analytics does not support the "set" command or Custom Dimensions. Command ignored.');
+      }
+
+      var classicCommand;
+
+      // Transpose our syntax from Universal Analytics to Classic Analytics
+      // Currently we only support 'send' style commands
+      if (command === 'send') {
+
+        switch(fieldsObj.hitType) {
+          case 'pageview':
+            classicCommand = ['_trackPageview', fieldsObj.page];
+            break;
+          case 'event':
+            classicCommand = [
+              '_trackEvent',
+              fieldsObj.category,
+              fieldsObj.action,
+              fieldsObj.label,
+              fieldsObj.value,
+              fieldsObj.nonInteraction
+            ];
+            break;
+          case 'timing':
+            classicCommand = [
+              '_trackTiming',
+              fieldsObj.timingCategory,
+              fieldsObj.timingVar,
+              fieldsObj.timingValue,
+              fieldsObj.timingLabel,
+              fieldsObj.optSampleRate
+            ];
+            break;
+        }
+
+      }
+
+      if (command === 'ecommerce:addTransaction') {
+
+        classicCommand = [
+          '_addTrans',
+          fieldsObj.id,
+          fieldsObj.affiliation,
+          fieldsObj.revenue,
+          fieldsObj.tax,
+          fieldsObj.shipping,
+          fieldsObj.billingCity,
+          fieldsObj.billingRegion,
+          fieldsObj.billingCountry
+        ];
+
+      }
+
+      if (command === 'ecommerce:addItem') { 
+
+        classicCommand = [
+          '_addItem',
+          fieldsObj.id,
+          fieldsObj.sku,
+          fieldsObj.name,
+          fieldsObj.category,
+          fieldsObj.price,
+          fieldsObj.quantity
+        ];
+
+      }
+
+      if (command === '_set') {
+
+        classicCommand = [
+          '_set',
+          'currencyCode',
+          fieldsObj
+        ];
+
+      }
+
+      if (command === 'ecommerce:send') {
+
+        classicCommand = [
+          '_trackTrans' 
+        ];
+
+      }
+
+      if (!classicCommand) {
+        return console.log('Unable to find command ' + command + ' or fieldsObj missing required properties. Command ignored.');
+      }
+
+      // Issue our command to GA
+      window._gaq.push(classicCommand);
+
+      if (shouldCopyHit) {
+
+        angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
+          
+          var classicCommandClone = [].slice.call(classicCommand);
+          // Namespace the command as required
+          classicCommandClone[0] = accountName + '.' + classicCommandClone[0];
+
+          window._gaq.push(classicCommandClone);
+
+        });
+
+      }
 
     }
 
-    if (command === 'ecommerce:addItem') {
-
-      classicCommand = [
-        '_addItem',
-        fieldsObj.id,
-        fieldsObj.sku,
-        fieldsObj.name,
-        fieldsObj.category,
-        fieldsObj.price,
-        fieldsObj.quantity
-      ];
-
-    }
-
-    if (command === '_set') {
-
-      classicCommand = [
-        '_set',
-        'currencyCode',
-        fieldsObj
-      ];
-
-    }
-
-    if (command === 'ecommerce:send') {
-
-      classicCommand = [
-        '_trackTrans'
-      ];
-
-    }
-
-    if (!classicCommand) {
-      return console.log('Unable to find command ' + command + ' or fieldsObj missing required properties. Command ignored.');
-    }
-
-    // Issue our command to GA
-    $window._gaq.push(classicCommand);
-
-    if (shouldCopyHit) {
-
-      angular.forEach($analyticsProvider.settings.ga.additionalAccountNames, function (accountName){
-
-        var classicCommandClone = [].slice.call(classicCommand);
-        // Namespace the command as required
-        classicCommandClone[0] = accountName + '.' + classicCommandClone[0];
-
-        $window._gaq.push(classicCommandClone);
-
-      });
-
-    }
-
-  }
-
-
-
-  /**
-   * Helper function for getting page value
-   *
-   * @param {Object} properties
-   *
-   * @returns {String}
-   */
-  function getPage_(properties) {
-
-    return properties.page || pagePathCache || 
-      $window.location.hash.substring(1) || window.location.pathname;
-
-  }
+  })();
 
 }]);
 })(window, window.angular);

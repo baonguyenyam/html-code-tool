@@ -1,6 +1,6 @@
 {
   "name": "ng-device-detector",
-  "version": "5.1.2",
+  "version": "5.0.2",
   "devDependencies": {
     "angular": "^1.6.7",
     "angular-mocks": "^1.6.7",
@@ -18,13 +18,10 @@
     "karma-nested-reporter": "^0.1.6",
     "karma-phantomjs-launcher": "^1.0.4",
     "phantomjs": "~2.1.7",
-    "standard-version": "^4.3.0",
     "uglify-js": "^2.8.29"
   },
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS",
-    "release": "node_modules/standard-version/bin/cli.js",
-    "publish-version": "(git push --follow-tags origin master) && (npm publish)"
+    "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS"
   },
   "description": "Uses user-agent to set css classes or directly usable via JS.",
   "main": "index.js",
@@ -42,7 +39,7 @@
   },
   "homepage": "https://github.com/srfrnk/ng-device-detector",
   "dependencies": {
-    "re-tree": "^0.1.7",
-    "ua-device-detector": "^1.1.1"
+    "re-tree": "~0.0.2",
+    "ua-device-detector": "^1.0.1"
   }
 }

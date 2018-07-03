@@ -1,16 +1,16 @@
 (function() {
     'use strict';
     var MODULE_NAME = 'ngclipboard';
-    var angular, ClipboardJS;
-
+    var angular, Clipboard;
+    
     // Check for CommonJS support
     if (typeof module === 'object' && module.exports) {
       angular = require('angular');
-      ClipboardJS = require('clipboard');
+      Clipboard = require('clipboard');
       module.exports = MODULE_NAME;
     } else {
       angular = window.angular;
-      ClipboardJS = window.ClipboardJS;
+      Clipboard = window.Clipboard;
     }
 
     angular.module(MODULE_NAME, []).directive('ngclipboard', function() {
@@ -21,8 +21,7 @@
                 ngclipboardError: '&'
             },
             link: function(scope, element) {
-                //constructor for clipboardjs changed to ClipboardJS
-                var clipboard = new ClipboardJS(element[0]);
+                var clipboard = new Clipboard(element[0]);
 
                 clipboard.on('success', function(e) {
                   scope.$apply(function () {
@@ -39,7 +38,7 @@
                     });
                   });
                 });
-
+                
                 element.on('$destroy', function() {
                     clipboard.destroy();
                 });

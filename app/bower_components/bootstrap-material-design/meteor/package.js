@@ -14,11 +14,16 @@ Package.describe({
 });
 
 Package.onUse(function (api) {
-  api.versionsFrom('METEOR@1.2');
-  api.use('twbs:bootstrap@3.3.6');
+  api.versionsFrom(['METEOR@0.9.0', 'METEOR@1.0']);
+  api.use('twbs:bootstrap@3.3.1');
   api.use('jquery');
   api.addFiles([
-    'dist/css/bootstrap-material-design.css',
+    // we bundle all font files, but the client will request only one of them via the CSS @font-face rule
+    'dist/fonts/Material-Design-Icons.eot',  // IE8 or older
+    'dist/fonts/Material-Design-Icons.svg',  // SVG fallback for iOS < 5 - http://caniuse.com/#feat=svg-fonts, http://stackoverflow.com/a/11002874/126903
+    'dist/fonts/Material-Design-Icons.ttf',  // Android Browers 4.1, 4.3 - http://caniuse.com/#feat=ttf
+    'dist/fonts/Material-Design-Icons.woff', // Supported by all modern browsers
+    'dist/css/material.css',
     'dist/css/ripples.css',
     'dist/js/material.js',
     'dist/js/ripples.js',
